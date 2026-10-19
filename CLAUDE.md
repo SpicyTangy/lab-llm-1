@@ -21,6 +21,8 @@
 - Distinguere nel resoconto le prove eseguite da quelle ancora da fare.
 
 ## Git
+- `main` contiene solo codice stabile e verificato; `develop` è per i lavori in corso.
+- Si porta il lavoro su `main` solo dopo la verifica, con un merge da `develop`, mai con commit diretti.
 - La repository è pubblica: non committare `.env`, `.venv/`, pesi, log, slide o altro materiale del corso.
 - Prima di ogni commit controllare `git diff` e `git diff --staged`: deve contenere una sola modifica logica.
 - Un commit per estensione, con titolo `feat(client): ...` e corpo che descrive cosa è cambiato e come è stato verificato.
