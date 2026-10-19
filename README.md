@@ -55,7 +55,7 @@ In VS Code selezionare l'interprete `.venv` con **Python: Select Interpreter**.
 .\.venv\Scripts\python.exe client.py
 ```
 
-Il client chiede una domanda al prompt `Tu>`, stampa il testo della risposta e ne chiede un'altra. Si esce con `esci`, con Ctrl+C o a fine input; le righe vuote sono ignorate. Ogni domanda è una richiesta indipendente: il modello non ricorda le precedenti. La risposta può risultare troncata: `max_tokens` è 180.
+Il client chiede una domanda al prompt `Tu>`, stampa la risposta a frammenti mentre il modello la genera (streaming) e ne chiede un'altra. Si esce con `esci`, con Ctrl+C o a fine input; le righe vuote sono ignorate. Ogni domanda è una richiesta indipendente: il modello non ricorda le precedenti. La risposta può risultare troncata: `max_tokens` è 180.
 
 ## Verifica
 
