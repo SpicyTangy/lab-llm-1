@@ -5,6 +5,7 @@ configurazione, messaggi, payload e chiamata HTTP.
 Import e gestione degli errori sono gia' presenti: conservarli.
 """
 
+import json
 import os
 
 import requests
@@ -17,6 +18,7 @@ model = os.environ["LM_MODEL"]
 
 # --- Messaggi -------------------------------------------------------------
 SYSTEM = "Rispondi in italiano."
+messages = [{"role": "system", "content": SYSTEM}]
 
 # --- Ciclo di input -------------------------------------------------------
 while True:
@@ -33,21 +35,39 @@ while True:
     # --- Payload ----------------------------------------------------------
     payload = {
         "model": model,
-        "messages": [
-            {"role": "system", "content": SYSTEM},
-            {"role": "user", "content": domanda},
-        ],
+        "messages": messages + [{"role": "user", "content": domanda}],
         "temperature": 0.2,
         "max_tokens": 180,
         "reasoning_effort": "none",
-        "stream": False,
+        "stream": True,
     }
 
     # --- Chiamata ---------------------------------------------------------
     try:
-        response = requests.post(f"{base_url}/chat/completions", json=payload, timeout=60)
+        testo = ""
+        response = requests.post(
+            f"{base_url}/chat/completions",
+            json=payload,
+            stream=True,
+            timeout=(5, 120),
+        )
         response.raise_for_status()
-        print(response.json()["choices"][0]["message"]["content"])
+        for riga in response.iter_lines():
+            riga = riga.decode("utf-8")
+            if not riga.startswith("data: "):
+                continue
+            dati = riga[len("data: "):]
+            if dati == "[DONE]":
+                break
+            delta = json.loads(dati)["choices"][0]["delta"]
+            frammento = delta.get("content") or ""
+            print(frammento, end="", flush=True)
+            testo += frammento
+        response.close()
+        print()
+        if testo:
+            messages.append({"role": "user", "content": domanda})
+            messages.append({"role": "assistant", "content": testo})
     except requests.exceptions.Timeout:
         print("Attesa scaduta: controllare server, carico e tempi.")
     except requests.exceptions.ConnectionError:
