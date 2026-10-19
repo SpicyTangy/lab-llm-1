@@ -55,11 +55,11 @@ In VS Code selezionare l'interprete `.venv` con **Python: Select Interpreter**.
 .\.venv\Scripts\python.exe client.py
 ```
 
-Il client invia una domanda fissa e stampa il testo della risposta. La risposta può risultare troncata: `max_tokens` è 180.
+Il client chiede una domanda al prompt `Tu>`, stampa il testo della risposta e ne chiede un'altra. Si esce con `esci`, con Ctrl+C o a fine input; le righe vuote sono ignorate. Ogni domanda è una richiesta indipendente: il modello non ricorda le precedenti. La risposta può risultare troncata: `max_tokens` è 180.
 
 ## Verifica
 
-1. Con il server di LM Studio acceso, `client.py` stampa la risposta del modello.
+1. Con il server di LM Studio acceso, due domande diverse nella stessa esecuzione ricevono ciascuna una risposta; `esci` chiude il programma.
 2. Per provare l'errore, in PowerShell si indica una porta senza server solo per quel processo, senza modificare `.env`:
 
    ```powershell

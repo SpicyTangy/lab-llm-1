@@ -17,29 +17,40 @@ model = os.environ["LM_MODEL"]
 
 # --- Messaggi -------------------------------------------------------------
 SYSTEM = "Rispondi in italiano."
-QUESTION = "Che cosa controllare se Python segnala FileNotFoundError?"
 
-# --- Payload --------------------------------------------------------------
-payload = {
-    "model": model,
-    "messages": [
-        {"role": "system", "content": SYSTEM},
-        {"role": "user", "content": QUESTION},
-    ],
-    "temperature": 0.2,
-    "max_tokens": 180,
-    "reasoning_effort": "none",
-    "stream": False,
-}
+# --- Ciclo di input -------------------------------------------------------
+while True:
+    try:
+        domanda = input("Tu> ").strip()
+    except (EOFError, KeyboardInterrupt):
+        print()
+        break
+    if domanda.lower() == "esci":
+        break
+    if not domanda:
+        continue
 
-# --- Chiamata -------------------------------------------------------------
-try:
-    response = requests.post(f"{base_url}/chat/completions", json=payload, timeout=60)
-    response.raise_for_status()
-    print(response.json()["choices"][0]["message"]["content"])
-except requests.exceptions.Timeout:
-    print("Attesa scaduta: controllare server, carico e tempi.")
-except requests.exceptions.ConnectionError:
-    print("Connessione fallita: controllare server, URL e porta.")
-except requests.exceptions.HTTPError:
-    print("Errore HTTP:", response.status_code, response.text)
+    # --- Payload ----------------------------------------------------------
+    payload = {
+        "model": model,
+        "messages": [
+            {"role": "system", "content": SYSTEM},
+            {"role": "user", "content": domanda},
+        ],
+        "temperature": 0.2,
+        "max_tokens": 180,
+        "reasoning_effort": "none",
+        "stream": False,
+    }
+
+    # --- Chiamata ---------------------------------------------------------
+    try:
+        response = requests.post(f"{base_url}/chat/completions", json=payload, timeout=60)
+        response.raise_for_status()
+        print(response.json()["choices"][0]["message"]["content"])
+    except requests.exceptions.Timeout:
+        print("Attesa scaduta: controllare server, carico e tempi.")
+    except requests.exceptions.ConnectionError:
+        print("Connessione fallita: controllare server, URL e porta.")
+    except requests.exceptions.HTTPError:
+        print("Errore HTTP:", response.status_code, response.text)
