@@ -2,6 +2,15 @@ import socket
 
 import pytest
 
+from aiuti import ISTANTE
+from assistente.strumenti import crea_orologio
+
+
+@pytest.fixture
+def orologio_fisso():
+    """Strumento orologio fermo su ISTANTE (2026-10-26T12:00Z)."""
+    return crea_orologio(adesso=lambda: ISTANTE)
+
 
 @pytest.fixture
 def porta_chiusa():
