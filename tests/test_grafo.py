@@ -4,7 +4,7 @@ import pytest
 from langchain_core.messages import AIMessage, HumanMessage, SystemMessage, ToolMessage
 from langgraph.graph import END
 
-from aiuti import chiamata, conta_coerenza, grafo_con
+from aiuti import chiamata, chiamata_malformata, conta_coerenza, grafo_con
 from assistente.grafo import (
     MESSAGGIO_LIMITE,
     RISULTATO_NON_ESEGUITO,
@@ -102,3 +102,25 @@ def test_errore_del_modello_non_tocca_la_cronologia(orologio_fisso):
 def test_prompt_sistema_cita_fuso_e_strumento():
     p = prompt_sistema("Europe/Rome")
     assert "Europe/Rome" in p and "orologio" in p
+
+
+def test_instrada_tool_call_malformata_va_a_strumenti():
+    assert instrada({"messages": [chiamata_malformata()], "passi": 1}, 5) == "strumenti"
+
+
+def test_tool_call_malformata_riceve_risposta_e_finisce_nel_log(orologio_fisso, caplog):
+    caplog.set_level(logging.INFO, logger="assistente.grafo")
+    g, _ = grafo_con([chiamata_malformata(), AIMessage("ok")], orologio_fisso)
+    msgs = esegui_turno(g, [], "ora?", 5)
+    assert [type(m) for m in msgs] == [HumanMessage, AIMessage, ToolMessage, AIMessage]
+    assert msgs[2].tool_call_id == "c1"
+    assert msgs[2].content.startswith("Errore: argomenti non validi per 'orologio'")
+    assert "orologio" in caplog.text and "JSON non valido" in caplog.text
+    assert conta_coerenza(msgs)[0] == conta_coerenza(msgs)[1]
+
+
+def test_tool_call_malformata_al_limite(orologio_fisso):
+    g, _ = grafo_con([chiamata_malformata()], orologio_fisso, max_passi=1)
+    msgs = esegui_turno(g, [], "ora?", 1)
+    assert msgs[-1].content == MESSAGGIO_LIMITE
+    assert conta_coerenza(msgs)[0] == conta_coerenza(msgs)[1]

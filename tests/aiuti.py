@@ -45,6 +45,22 @@ def chiamata(nome="orologio", args=None, id="c1") -> AIMessage:
     )
 
 
+def chiamata_malformata(nome="orologio", id="c1") -> AIMessage:
+    """Come la produce langchain_openai quando il modello emette argomenti non JSON."""
+    return AIMessage(
+        content="",
+        invalid_tool_calls=[
+            {
+                "name": nome,
+                "args": '{"fuso_orario": ',
+                "id": id,
+                "error": "JSON non valido",
+                "type": "invalid_tool_call",
+            }
+        ],
+    )
+
+
 def grafo_con(risposte, orologio, max_passi=5, errore=None):
     finto = ModelloFinto(risposte=risposte, errore=errore)
     grafo = crea_grafo(finto, [orologio], max_passi, prompt_sistema("Europe/Rome"))
@@ -52,7 +68,9 @@ def grafo_con(risposte, orologio, max_passi=5, errore=None):
 
 
 def conta_coerenza(msgs):
-    """(numero di tool_call richieste, numero di ToolMessage di risposta)."""
-    richieste = sum(len(m.tool_calls) for m in msgs if isinstance(m, AIMessage))
+    """(numero di tool_call richieste, anche malformate; numero di ToolMessage di risposta)."""
+    richieste = sum(
+        len(m.tool_calls) + len(m.invalid_tool_calls) for m in msgs if isinstance(m, AIMessage)
+    )
     risposte = sum(1 for m in msgs if isinstance(m, ToolMessage))
     return richieste, risposte

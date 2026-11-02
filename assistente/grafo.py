@@ -40,10 +40,20 @@ def prompt_sistema(fuso_locale: str) -> str:
     )
 
 
+def chiamate_pendenti(messaggio: AnyMessage) -> list[dict]:
+    """Le tool_call del messaggio, comprese quelle con argomenti non JSON (`invalid_tool_calls`).
+
+    Anche queste vengono rimandate al server nella cronologia: ognuna deve avere una risposta.
+    """
+    return [
+        *getattr(messaggio, "tool_calls", []),
+        *getattr(messaggio, "invalid_tool_calls", []),
+    ]
+
+
 def instrada(stato: Stato, max_passi: int) -> str:
     """Decide dove andare dopo il nodo `modello`."""
-    ultimo = stato["messages"][-1]
-    if not getattr(ultimo, "tool_calls", None):
+    if not chiamate_pendenti(stato["messages"][-1]):
         return END
     if stato["passi"] < max_passi:
         return "strumenti"
@@ -63,10 +73,12 @@ def crea_grafo(
 
     def nodo_strumenti(stato: Stato) -> dict:
         risultati = []
-        for tc in stato["messages"][-1].tool_calls:
+        for tc in chiamate_pendenti(stato["messages"][-1]):
             nome, args = tc["name"], tc["args"]
             strumento = per_nome.get(nome)
-            if strumento is None:
+            if tc.get("type") == "invalid_tool_call":
+                risultato = f"Errore: argomenti non validi per '{nome}': {tc.get('error')}"
+            elif strumento is None:
                 risultato = f"Errore: strumento sconosciuto '{nome}'."
             else:
                 try:
@@ -88,7 +100,7 @@ def crea_grafo(
         # Ogni tool_call pendente riceve una risposta, così la cronologia resta valida.
         non_eseguiti = [
             ToolMessage(content=RISULTATO_NON_ESEGUITO, tool_call_id=tc["id"], name=tc["name"])
-            for tc in stato["messages"][-1].tool_calls
+            for tc in chiamate_pendenti(stato["messages"][-1])
         ]
         return {"messages": [*non_eseguiti, AIMessage(MESSAGGIO_LIMITE)]}
 
