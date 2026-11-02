@@ -1,10 +1,30 @@
+import logging
+
 import httpx
 import openai
 import pytest
 from langchain_core.messages import AIMessage
 
 from aiuti import grafo_con
-from assistente.terminale import RISPOSTA_VUOTA, chat
+from assistente.terminale import RISPOSTA_VUOTA, chat, configura_log
+
+LOGGER_HTTP = ("httpx", "httpx2", "openai")
+
+
+@pytest.fixture
+def logging_ripristinato():
+    """configura_log tocca la configurazione globale: la rimette com'era a fine test."""
+    radice = logging.getLogger()
+    prima = (radice.handlers[:], radice.level, {n: logging.getLogger(n).level for n in LOGGER_HTTP})
+    yield
+    radice.handlers[:], radice.level = prima[0], prima[1]
+    for nome, livello in prima[2].items():
+        logging.getLogger(nome).setLevel(livello)
+
+
+def test_configura_log_zittisce_le_librerie_http(logging_ripristinato):
+    configura_log("INFO")
+    assert all(logging.getLogger(n).level == logging.WARNING for n in LOGGER_HTTP)
 
 
 def ingressi(*righe):

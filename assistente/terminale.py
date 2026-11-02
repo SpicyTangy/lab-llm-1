@@ -27,7 +27,8 @@ def configura_log(livello: str) -> None:
         force=True,
     )
     if livello != "DEBUG":
-        for rumoroso in ("httpx", "openai"):
+        # openai 3.x usa httpx2; httpx resta per le librerie che lo usano ancora.
+        for rumoroso in ("httpx", "httpx2", "openai"):
             logging.getLogger(rumoroso).setLevel(logging.WARNING)
 
 
