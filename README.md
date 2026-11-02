@@ -144,5 +144,6 @@ Il grafo (`assistente/grafo.py`):
 | `Impossibile ottenere i modelli da http://.../models ... Avvia il server di LM Studio` (uscita 1) | server di LM Studio spento o indirizzo sbagliato |
 | `LMSTUDIO_MODEL: il modello '...' non è servito da LM Studio. Modelli disponibili: ...` (uscita 1) | id errato o modello non caricato: usare uno degli id elencati |
 | `assistente> Non riesco a comunicare con LM Studio (...)` durante la chat | LM Studio fermato a sessione aperta: riavviarlo; la cronologia resta valida |
+| `assistente> Errore inatteso durante la risposta (...)` | risposta del modello non interpretabile: riprovare; con `LOG_LEVEL=DEBUG` il log mostra il dettaglio |
 | `assistente> Mi fermo qui: ho raggiunto il limite di passaggi...` | il modello ha chiesto lo strumento più di `MAX_PASSI` volte: riformulare o alzare `MAX_PASSI` |
 | `env file ...\.env not found` da `docker compose` | creare `.env` da `.env.example` |
