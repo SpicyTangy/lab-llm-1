@@ -86,3 +86,13 @@ def test_ctrl_c_durante_il_turno(orologio_fisso):
     uscita = []
     chat(g, 5, ingressi("ciao"), uscita.append)
     assert uscita[-1] == "Alla prossima!"
+
+
+def test_errore_inatteso_non_chiude_la_sessione(orologio_fisso):
+    g, finto = grafo_con([AIMessage("ok")], orologio_fisso, errore=ValueError("risposta strana"))
+    uscita = []
+    chat(g, 5, ingressi("prima", "seconda", "esci"), uscita.append)
+    assert len(finto.chiamate) == 2
+    assert [m.content for m in finto.chiamate[1][1:]] == ["seconda"]
+    assert any("risposta strana" in r for r in uscita)
+    assert uscita[-1] == "Alla prossima!"

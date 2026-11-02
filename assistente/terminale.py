@@ -54,6 +54,11 @@ def chat(
                 log.debug("errore durante il turno", exc_info=True)
                 scrivi(f"assistente> Non riesco a comunicare con LM Studio ({e}). Riprova.")
                 continue
+            except Exception as e:
+                # Es. risposta del modello non interpretabile: niente traceback, si continua.
+                log.debug("errore inatteso durante il turno", exc_info=True)
+                scrivi(f"assistente> Errore inatteso durante la risposta ({e}). Riprova.")
+                continue
             scrivi(f"assistente> {cronologia[-1].content or RISPOSTA_VUOTA}")
     except (EOFError, KeyboardInterrupt):
         pass
