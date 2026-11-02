@@ -1,0 +1,5 @@
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+markers = ["lmstudio: prove reali che richiedono LM Studio acceso (pytest -m lmstudio)"]
+addopts = "-m 'not lmstudio'"
