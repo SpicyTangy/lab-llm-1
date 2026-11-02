@@ -1,8 +1,8 @@
 # Assistente del laboratorio
 
 Progetto del corso «Deep Learning e LLM: costruire chatbot e agenti».
-La cartella del progetto è `LLM/`; all'inizio contiene soltanto questo file.
-Struttura, dipendenze e comandi verranno definiti con la specifica e il piano.
+La cartella del progetto è `LLM/` (radice della repository). Requisiti e scelte sono nella
+specifica `docs/superpowers/specs/2026-10-26-assistente-orologio-design.md`.
 
 ## Obiettivo
 Un'applicazione da terminale in Python che conversa con un modello locale e:
@@ -31,6 +31,22 @@ Un'applicazione da terminale in Python che conversa con un modello locale e:
 - Docker Compose per l'applicazione; LM Studio non va containerizzato.
 - Dipendenze motivate, concordate e con versioni fissate.
 - Comandi documentati anche per PowerShell (Windows).
+
+## Struttura
+- `assistente/` — pacchetto dell'applicazione: `config.py` (variabili d'ambiente),
+  `strumenti.py` (orologio), `modello.py` (LM Studio), `grafo.py` (grafo LangGraph),
+  `terminale.py` (chat e log), `__main__.py` (avvio).
+- `tests/` — test `pytest`; `aiuti.py` contiene il modello finto; le prove reali sono in
+  `test_reale_lmstudio.py` con il marcatore `lmstudio`.
+- `requirements.txt` (esecuzione), `requirements-dev.txt` (+ pytest), `pyproject.toml` (config pytest).
+- `Dockerfile`, `compose.yaml`, `.dockerignore`; `.env.example` come modello di `.env`.
+- `docs/superpowers/` — specifiche e piani.
+
+## Comandi (PowerShell)
+- Ambiente: `py -3.14 -m venv .venv` poi `.\.venv\Scripts\python -m pip install -r requirements-dev.txt`.
+- Test automatici (senza LM Studio): `.\.venv\Scripts\python -m pytest`.
+- Prove reali (LM Studio acceso, `.env` caricato): `.\.venv\Scripts\python -m pytest -m lmstudio -v`.
+- Avvio: `.\.venv\Scripts\python -m assistente`; in container: `docker compose run --rm assistente`.
 
 ## Metodo: Superpowers
 - Usare le skill di Superpowers per brainstorming, specifica, piano, implementazione e verifica.
